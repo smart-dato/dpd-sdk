@@ -4,7 +4,6 @@ namespace SmartDato\Dpd;
 
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use SmartDato\Dpd\Commands\DpdCommand;
 
 class DpdServiceProvider extends PackageServiceProvider
 {
@@ -18,5 +17,12 @@ class DpdServiceProvider extends PackageServiceProvider
         $package
             ->name('dpd-sdk')
             ->hasConfigFile();
+    }
+
+    public function packageRegistered(): void
+    {
+        // Bind default Dpd instance (uses config from .env)
+        // This is used by the Facade when no runtime config is provided
+        $this->app->singleton(Dpd::class, fn ($app) => new Dpd);
     }
 }
