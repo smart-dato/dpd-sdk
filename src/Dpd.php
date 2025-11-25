@@ -16,9 +16,9 @@ class Dpd
 {
     protected array $config;
 
-    protected ShipmentService $shipmentService;
+    protected ?ShipmentService $shipmentService = null;
 
-    protected TrackingService $trackingService;
+    protected ?TrackingService $trackingService = null;
 
     /**
      * Create a new Dpd instance.
@@ -38,9 +38,9 @@ class Dpd
             $config ?? []
         );
 
-        // Create services with merged config (or use injected for testing)
-        $this->shipmentService = $shipmentService ?? $this->createShipmentService();
-        $this->trackingService = $trackingService ?? $this->createTrackingService();
+        // Store injected services (for testing)
+        $this->shipmentService = $shipmentService;
+        $this->trackingService = $trackingService;
     }
 
     /**
@@ -48,6 +48,10 @@ class Dpd
      */
     public function shipment(): ShipmentBuilder
     {
+        if ($this->shipmentService === null) {
+            $this->shipmentService = $this->createShipmentService();
+        }
+
         return new ShipmentBuilder($this->shipmentService, $this->config);
     }
 
@@ -56,6 +60,10 @@ class Dpd
      */
     public function track(string $parcelNumber): Collection
     {
+        if ($this->trackingService === null) {
+            $this->trackingService = $this->createTrackingService();
+        }
+
         return $this->trackingService->track($parcelNumber);
     }
 
