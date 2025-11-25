@@ -25,6 +25,7 @@ return [
     'credentials' => [
         'delis_id' => env('DPD_DELIS_ID'),
         'password' => env('DPD_PASSWORD'),
+        'sending_depot' => env('DPD_SENDING_DEPOT'), // 4-digit depot code (optional, defaults to first 4 digits of delis_id)
     ],
 
     /*
@@ -102,8 +103,8 @@ return [
     'defaults' => [
         'label_format' => 'PDF', // PDF or ZPL
         'print_options' => [
-            'printer_language' => 'PDF',
-            'paper_format' => 'A4',
+            'outputFormat' => 'PDF',
+            'paperFormat' => 'A4',
         ],
     ],
 

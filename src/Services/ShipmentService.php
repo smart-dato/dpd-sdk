@@ -17,6 +17,8 @@ class ShipmentService
      * Create a single shipment.
      *
      * @param  array  $shipmentData  Shipment data including sender, recipient, parcels
+     *
+     * @throws \Throwable
      */
     public function createShipment(array $shipmentData): ShipmentResponse
     {
@@ -39,23 +41,87 @@ class ShipmentService
     protected function buildOrder(array $shipmentData): array
     {
         $order = [
-            'generalShipmentData' => [
-                'sender' => $shipmentData['sender'],
-                'recipient' => $shipmentData['recipient'],
+            'generalShipmentData' => $this->buildGeneralShipmentData($shipmentData),
+            'parcels' => $shipmentData['parcels'] ?? [],
+            'productAndServiceData' => $shipmentData['product_and_service_data'] ?? [
+                'orderType' => 'consignment',
             ],
         ];
 
-        // Add parcels
-        if (isset($shipmentData['parcels'])) {
-            $order['parcels'] = $shipmentData['parcels'];
-        }
-
-        // Add product and service data if provided
-        if (isset($shipmentData['product_and_service_data'])) {
-            $order['productAndServiceData'] = $shipmentData['product_and_service_data'];
-        }
-
         return $order;
+    }
+
+    /**
+     * Build general shipment data structure.
+     */
+    protected function buildGeneralShipmentData(array $shipmentData): array
+    {
+
+        $generalData = [
+            'sendingDepot' => $shipmentData['sending_depot'] ?? null, // must be exactly 4 digits (depot code)
+            'product' => $shipmentData['product'] ?? 'CL',
+            'sender' => $this->normalizeAddress($shipmentData['sender']),
+            'recipient' => $this->normalizeAddress($shipmentData['recipient']),
+        ];
+
+        // Add optional fields if present
+        $optionalFields = [
+            'mpsId',
+            'cUser',
+            'mpsCustomerReferenceNumber1',
+            'mpsCustomerReferenceNumber2',
+            'mpsCustomerReferenceNumber3',
+            'mpsCustomerReferenceNumber4',
+            'identificationNumber',
+            'mpsCompleteDelivery',
+            'mpsVolume',
+            'mpsWeight',
+            'returnAddress',
+            'softwareVersion',
+        ];
+
+        foreach ($optionalFields as $field) {
+            if (isset($shipmentData[$field])) {
+                $generalData[$field] = $shipmentData[$field];
+            }
+        }
+
+        return $generalData;
+    }
+
+    /**
+     * Normalize address structure to match DPD API format.
+     */
+    protected function normalizeAddress(array $address): array
+    {
+        return [
+            'name1' => $address['name'] ?? $address['name1'] ?? '',
+            'name2' => $address['company'] ?? $address['name2'] ?? null,
+            'street' => $address['street'] ?? '',
+            'houseNo' => $address['houseNumber'] ?? $address['houseNo'] ?? '',
+            'country' => $address['country'] ?? '',
+            'zipCode' => $address['zipCode'] ?? '',
+            'city' => $address['city'] ?? '',
+            'state' => $address['state'] ?? null,
+            'contact' => $address['contact'] ?? null,
+            'phone' => $address['phone'] ?? null,
+            'mobile' => $address['mobile'] ?? null,
+            'fax' => $address['fax'] ?? null,
+            'email' => $address['email'] ?? null,
+            'comment' => $address['comment'] ?? null,
+            'gln' => $address['gln'] ?? null,
+            'customerNumber' => $address['customerNumber'] ?? null,
+            'iaccount' => $address['iaccount'] ?? null,
+            'businessUnit' => $address['businessUnit'] ?? null,
+            'addressType' => $address['addressType'] ?? null,
+            'additionalInfo2' => $address['additionalInfo2'] ?? null,
+            'additionalInfo3' => $address['additionalInfo3'] ?? null,
+            'eori' => $address['eori'] ?? null,
+            'vatNumber' => $address['vatNumber'] ?? null,
+            'taxIdType' => $address['taxIdType'] ?? null,
+            'taxIdValue' => $address['taxIdValue'] ?? null,
+            'accountOwner' => $address['accountOwner'] ?? null,
+        ];
     }
 
     /**
@@ -64,20 +130,20 @@ class ShipmentService
     protected function parseResponse(mixed $response): ShipmentResponse
     {
         // Extract parcel number and label from response
-        $shipmentResult = $response->orderResult->shipmentResponses->parcelInformation ?? null;
+        $orderResult = $response->orderResult;
+        $shipmentResult = $orderResult->shipmentResponses->parcelInformation ?? null;
 
         if (! $shipmentResult) {
             throw new \RuntimeException('Invalid shipment response from DPD');
         }
 
         $parcelNumber = $shipmentResult->parcelLabelNumber ?? '';
-        $labelContent = $response->orderResult->parcellabelsPDF ?? '';
-        $labelFormat = $this->config['defaults']['label_format'] ?? 'PDF';
+        $labelContent = $orderResult->output->content ?? '';
+        $labelFormat = $orderResult->output->format ?? '';
 
         $label = new Label(
-            content: base64_decode($labelContent),
+            content: $labelContent,
             format: $labelFormat,
-            mimeType: $labelFormat === 'PDF' ? 'application/pdf' : 'text/plain'
         );
 
         return new ShipmentResponse(
@@ -93,9 +159,14 @@ class ShipmentService
      */
     protected function getDefaultPrintOptions(): array
     {
-        return $this->config['defaults']['print_options'] ?? [
-            'printerLanguage' => 'PDF',
+        $printOption = $this->config['defaults']['print_options'] ?? [
+            'outputFormat' => 'PDF',
             'paperFormat' => 'A4',
+        ];
+
+        // Wrap in printOptions structure
+        return [
+            'printOption' => [$printOption],
         ];
     }
 }

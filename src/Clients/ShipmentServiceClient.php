@@ -42,6 +42,8 @@ class ShipmentServiceClient extends BaseSoapClient
      * @param  array  $printOptions  Print options for labels (format, paper size, etc.)
      * @param  array  $orders  Array of order/shipment data (max 30)
      * @return mixed SOAP response containing parcel numbers and labels
+     *
+     * @throws \Throwable
      */
     public function storeOrders(array $printOptions, array $orders): mixed
     {

@@ -33,6 +33,8 @@ abstract class BaseSoapClient
 
     /**
      * Call a SOAP method with the given parameters.
+     *
+     * @throws \Throwable
      */
     protected function call(string $method, array $params = []): mixed
     {
@@ -45,7 +47,6 @@ abstract class BaseSoapClient
 
             // Make the SOAP call
             $response = $this->soapClient->__soapCall($method, $params);
-
             $this->logRequest($method, $params, $response);
 
             return $response;

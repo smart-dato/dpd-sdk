@@ -1,6 +1,6 @@
 {
     "name": "smart-dato/dpd-sdk",
-    "description": "This is my package dpd-sdk",
+    "description": "A Laravel package for integrating with the DPD shipping service API.",
     "keywords": [
         "SmartDato",
         "laravel",
@@ -23,6 +23,7 @@
     },
     "require-dev": {
         "laravel/pint": "^1.14",
+        "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.8",
         "larastan/larastan": "^3.0",
         "orchestra/testbench": "^10.0.0||^9.0.0",

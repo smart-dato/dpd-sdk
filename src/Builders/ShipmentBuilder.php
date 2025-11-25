@@ -55,7 +55,11 @@ class ShipmentBuilder
      */
     public function labelFormat(string $format): self
     {
-        $this->data['print_options']['printerLanguage'] = $format;
+        if (! isset($this->data['print_options']['printOption'])) {
+            $this->data['print_options']['printOption'] = [[]];
+        }
+
+        $this->data['print_options']['printOption'][0]['outputFormat'] = $format;
 
         return $this;
     }
@@ -65,13 +69,39 @@ class ShipmentBuilder
      */
     public function paperFormat(string $format): self
     {
-        $this->data['print_options']['paperFormat'] = $format;
+        if (! isset($this->data['print_options']['printOption'])) {
+            $this->data['print_options']['printOption'] = [[]];
+        }
+
+        $this->data['print_options']['printOption'][0]['paperFormat'] = $format;
+
+        return $this;
+    }
+
+    /**
+     * Set the sending depot (defaults to your delis_id).
+     */
+    public function sendingDepot(string $depot): self
+    {
+        $this->data['sending_depot'] = $depot;
+
+        return $this;
+    }
+
+    /**
+     * Set the DPD product type (e.g., 'CL' for Classic).
+     */
+    public function product(string $product): self
+    {
+        $this->data['product'] = $product;
 
         return $this;
     }
 
     /**
      * Create the shipment and get the response.
+     *
+     * @throws \Throwable
      */
     public function create(): ShipmentResponse
     {
