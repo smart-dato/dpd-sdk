@@ -187,7 +187,7 @@ class ShipmentService
         }
 
         throw new \RuntimeException(
-            'DPD API Error: ' . implode('; ', $errorMessages)
+            'DPD API Error: '.implode('; ', $errorMessages)
         );
     }
 
