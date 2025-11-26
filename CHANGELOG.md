@@ -2,6 +2,10 @@
 
 All notable changes to `dpd-sdk` will be documented in this file.
 
+## 0.0.6 - 2025-11-26
+
+**Full Changelog**: https://github.com/smart-dato/dpd-sdk/compare/0.0.5...0.0.6
+
 ## 0.0.5 - 2025-11-26
 
 **Full Changelog**: https://github.com/smart-dato/dpd-sdk/compare/0.0.4...0.0.5
