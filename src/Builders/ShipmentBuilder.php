@@ -99,6 +99,16 @@ class ShipmentBuilder
     }
 
     /**
+     * Set the MPS ID (Multi Parcel Shipment ID) to group multiple shipments together.
+     */
+    public function mpsId(string $mpsId): self
+    {
+        $this->data['mpsId'] = $mpsId;
+
+        return $this;
+    }
+
+    /**
      * Set customer reference number 1 (e.g., order number, customer ID).
      */
     public function customerReferenceNumber1(string $reference): self

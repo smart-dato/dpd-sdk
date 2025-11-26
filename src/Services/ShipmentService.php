@@ -154,6 +154,7 @@ class ShipmentService
         }
 
         $parcelNumber = $shipmentResult->parcelLabelNumber ?? '';
+        $mpsId = $orderResult->shipmentResponses->mpsId ?? null;
         $labelContent = $orderResult->output->content ?? '';
         $labelFormat = $orderResult->output->format ?? '';
 
@@ -165,6 +166,7 @@ class ShipmentService
         return new ShipmentResponse(
             parcelNumber: $parcelNumber,
             label: $label,
+            mpsId: $mpsId,
             trackingUrl: "https://tracking.dpd.de/status/de_DE/parcel/{$parcelNumber}",
             rawResponse: (array) $response
         );
