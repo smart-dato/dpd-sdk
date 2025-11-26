@@ -129,12 +129,28 @@ class ShipmentService
      */
     protected function parseResponse(mixed $response): ShipmentResponse
     {
+        // Check if response contains errors
+        $orderResult = $response->orderResult ?? null;
+
+        if (! $orderResult) {
+            throw new \RuntimeException('Invalid response structure from DPD API');
+        }
+
+        // Check for fault/error information in the response
+        if (isset($orderResult->faultInfo)) {
+            $this->throwDpdError($orderResult->faultInfo);
+        }
+
+        // Check for errors in shipmentResponses
+        if (isset($orderResult->shipmentResponses->faults)) {
+            $this->throwDpdError($orderResult->shipmentResponses->faults);
+        }
+
         // Extract parcel number and label from response
-        $orderResult = $response->orderResult;
         $shipmentResult = $orderResult->shipmentResponses->parcelInformation ?? null;
 
         if (! $shipmentResult) {
-            throw new \RuntimeException('Invalid shipment response from DPD');
+            throw new \RuntimeException('Invalid shipment response from DPD: No parcel information found');
         }
 
         $parcelNumber = $shipmentResult->parcelLabelNumber ?? '';
@@ -151,6 +167,27 @@ class ShipmentService
             label: $label,
             trackingUrl: "https://tracking.dpd.de/status/de_DE/parcel/{$parcelNumber}",
             rawResponse: (array) $response
+        );
+    }
+
+    /**
+     * Throw a formatted exception based on DPD error information.
+     */
+    protected function throwDpdError(mixed $faultInfo): void
+    {
+        // Handle both single fault and array of faults
+        $faults = is_array($faultInfo) ? $faultInfo : [$faultInfo];
+
+        $errorMessages = [];
+        foreach ($faults as $fault) {
+            $errorCode = $fault->errorCode ?? $fault->faultCode ?? 'Unknown';
+            $errorMessage = $fault->errorMessage ?? $fault->faultMessage ?? $fault->message ?? 'Unknown error';
+
+            $errorMessages[] = sprintf('[%s] %s', $errorCode, $errorMessage);
+        }
+
+        throw new \RuntimeException(
+            'DPD API Error: ' . implode('; ', $errorMessages)
         );
     }
 

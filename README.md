@@ -56,6 +56,7 @@ Use the facade for simple, application-wide configuration:
 use SmartDato\Dpd\Facades\Dpd;
 
 $shipment = Dpd::shipment()
+    ->sendingDepot('0000')
     ->sender(fn($sender) => $sender
         ->name('John Doe')
         ->company('Acme Corp')
@@ -108,6 +109,7 @@ $dpdA = new Dpd([
 ]);
 
 $shipment = $dpdA->shipment()
+    ->sendingDepot('0000')
     ->sender(/* ... */)
     ->recipient(/* ... */)
     ->parcel(/* ... */)
@@ -138,6 +140,7 @@ foreach ($events as $event) {
 
 ```php
 $shipment = Dpd::shipment()
+    ->sendingDepot('0000')
     ->sender(/* ... */)
     ->recipient(/* ... */)
     ->parcel(fn($parcel) => $parcel
@@ -253,6 +256,30 @@ try {
     logger()->error('DPD SOAP error', ['error' => $e->getMessage()]);
 }
 ```
+
+### DPD API Error Responses
+
+The SDK automatically detects and formats errors returned by the DPD API. When the API returns error information in the response (instead of SOAP faults), you'll get clear error messages with error codes:
+
+```php
+try {
+    $shipment = Dpd::shipment()
+        ->sendingDepot('0000')
+        ->sender(/* ... */)
+        ->recipient(/* ... */)
+        ->create();
+} catch (\RuntimeException $e) {
+    // Example error message:
+    // "DPD API Error: [ERR123] Invalid sender address; [ERR456] Missing required field"
+    echo $e->getMessage();
+}
+```
+
+Common DPD error codes:
+- **Invalid address data** - Check sender/recipient address fields (name, street, zip code, city, country)
+- **Missing required fields** - Ensure all mandatory fields are provided
+- **Invalid depot code** - Verify the sending depot code (must be exactly 4 digits)
+- **Authentication issues** - Check your DPD credentials (delis_id and password)
 
 ## Testing
 
