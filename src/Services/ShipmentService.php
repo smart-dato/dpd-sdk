@@ -158,9 +158,16 @@ class ShipmentService
         $labelContent = $orderResult->output->content ?? '';
         $labelFormat = $orderResult->output->format ?? '';
 
+        // Extract barcode from ZPL label if format is ZPL
+        $barcode = null;
+        if (strtoupper($labelFormat) === 'ZPL') {
+            $barcode = $this->extractBarcodeFromZpl($labelContent);
+        }
+
         $label = new Label(
             content: $labelContent,
             format: $labelFormat,
+            barcode: $barcode,
         );
 
         return new ShipmentResponse(
@@ -170,6 +177,38 @@ class ShipmentService
             trackingUrl: "https://tracking.dpd.de/status/de_DE/parcel/{$parcelNumber}",
             rawResponse: (array) $response
         );
+    }
+
+    /**
+     * Extract barcode from ZPL label content.
+     *
+     * ZPL barcodes typically use ^BC (Code 128), ^BY (barcode configuration),
+     * and ^FD...^FS (field data) commands.
+     */
+    protected function extractBarcodeFromZpl(string $zplContent): ?string
+    {
+        // Look for common ZPL barcode patterns
+        // Pattern 1: ^BC followed by ^FD{data}^FS (Code 128)
+        if (preg_match('/\^BC[^\^]*\^FD([^\^]+)\^FS/i', $zplContent, $matches)) {
+            return trim($matches[1]);
+        }
+
+        // Pattern 2: ^B3 followed by ^FD{data}^FS (Code 39)
+        if (preg_match('/\^B3[^\^]*\^FD([^\^]+)\^FS/i', $zplContent, $matches)) {
+            return trim($matches[1]);
+        }
+
+        // Pattern 3: ^BY followed by ^BC and then ^FD{data}^FS
+        if (preg_match('/\^BY[^\^]*\^BC[^\^]*\^FD([^\^]+)\^FS/i', $zplContent, $matches)) {
+            return trim($matches[1]);
+        }
+
+        // Pattern 4: Any barcode command (^B*) followed by ^FD{data}^FS
+        if (preg_match('/\^B[A-Z0-9][^\^]*\^FD([^\^]+)\^FS/i', $zplContent, $matches)) {
+            return trim($matches[1]);
+        }
+
+        return null;
     }
 
     /**

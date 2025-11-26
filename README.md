@@ -86,6 +86,7 @@ $shipment = Dpd::shipment()
 
 // Access response data
 echo "Parcel Number: {$shipment->parcelNumber}\n";
+echo "MPS ID: {$shipment->mpsId}\n";
 echo "Tracking URL: {$shipment->trackingUrl}\n";
 
 // Save label to file
@@ -166,12 +167,44 @@ $shipment = Dpd::shipment()
     ->paperFormat('A4')
     ->create();
 
-// ZPL Label for thermal printers
+// ZPL Label for thermal printers (barcode is automatically extracted)
 $shipment = Dpd::shipment()
     // ...
     ->labelFormat('ZPL')
     ->create();
+
+// Access barcode from ZPL label
+echo "Barcode: {$shipment->label->barcode}\n"; // Only available for ZPL labels
+file_put_contents('label.zpl', $shipment->label->content);
 ```
+
+### Customer Reference Numbers and MPS ID
+
+Add custom reference numbers to track your shipments and group related shipments together:
+
+```php
+$shipment = Dpd::shipment()
+    ->sendingDepot('0000')
+    ->mpsId('MPS-ORDER-12345') // Multi Parcel Shipment ID to group shipments
+    ->customerReferenceNumber1('ORDER-12345') // e.g., Order number
+    ->customerReferenceNumber2('CUSTOMER-98765') // e.g., Customer ID
+    ->customerReferenceNumber3('WAREHOUSE-A') // e.g., Warehouse location
+    ->customerReferenceNumber4('BATCH-001') // e.g., Batch number
+    ->sender(/* ... */)
+    ->recipient(/* ... */)
+    ->parcel(/* ... */)
+    ->create();
+
+// The MPS ID is returned in the response
+echo "MPS ID: {$shipment->mpsId}\n";
+```
+
+**Use cases:**
+- **MPS ID**: Group multiple shipments together (useful for split orders or multi-box shipments)
+- **Reference Number 1**: Order number or invoice number
+- **Reference Number 2**: Customer ID or account number
+- **Reference Number 3**: Warehouse location or department
+- **Reference Number 4**: Batch number or shipping wave
 
 ## Configuration
 
