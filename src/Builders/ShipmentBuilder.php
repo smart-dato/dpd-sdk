@@ -99,6 +99,46 @@ class ShipmentBuilder
     }
 
     /**
+     * Set customer reference number 1 (e.g., order number, customer ID).
+     */
+    public function customerReferenceNumber1(string $reference): self
+    {
+        $this->data['mpsCustomerReferenceNumber1'] = $reference;
+
+        return $this;
+    }
+
+    /**
+     * Set customer reference number 2.
+     */
+    public function customerReferenceNumber2(string $reference): self
+    {
+        $this->data['mpsCustomerReferenceNumber2'] = $reference;
+
+        return $this;
+    }
+
+    /**
+     * Set customer reference number 3.
+     */
+    public function customerReferenceNumber3(string $reference): self
+    {
+        $this->data['mpsCustomerReferenceNumber3'] = $reference;
+
+        return $this;
+    }
+
+    /**
+     * Set customer reference number 4.
+     */
+    public function customerReferenceNumber4(string $reference): self
+    {
+        $this->data['mpsCustomerReferenceNumber4'] = $reference;
+
+        return $this;
+    }
+
+    /**
      * Create the shipment and get the response.
      *
      * @throws \Throwable
