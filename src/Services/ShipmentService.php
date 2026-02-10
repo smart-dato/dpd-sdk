@@ -233,6 +233,22 @@ class ShipmentService
     }
 
     /**
+     * Get the last SOAP request XML (useful for debugging/logging).
+     */
+    public function getLastRequest(): ?string
+    {
+        return $this->client->getLastRequest();
+    }
+
+    /**
+     * Get the last SOAP response XML (useful for debugging/logging).
+     */
+    public function getLastResponse(): ?string
+    {
+        return $this->client->getLastResponse();
+    }
+
+    /**
      * Get default print options from config.
      */
     protected function getDefaultPrintOptions(): array

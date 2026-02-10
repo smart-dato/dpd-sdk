@@ -159,6 +159,22 @@ class ShipmentBuilder
     }
 
     /**
+     * Get the last SOAP request XML (useful for debugging/logging).
+     */
+    public function getLastRequest(): ?string
+    {
+        return $this->service->getLastRequest();
+    }
+
+    /**
+     * Get the last SOAP response XML (useful for debugging/logging).
+     */
+    public function getLastResponse(): ?string
+    {
+        return $this->service->getLastResponse();
+    }
+
+    /**
      * Get the raw shipment data (useful for debugging).
      */
     public function toArray(): array
