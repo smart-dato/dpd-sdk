@@ -2,6 +2,14 @@
 
 All notable changes to `dpd-sdk` will be documented in this file.
 
+## 0.0.7 - 2026-02-10
+
+### What's Changed
+
+* Bump dependabot/fetch-metadata from 2.4.0 to 2.5.0 by @dependabot[bot] in https://github.com/smart-dato/dpd-sdk/pull/2
+
+**Full Changelog**: https://github.com/smart-dato/dpd-sdk/compare/0.0.6...0.0.7
+
 ## 0.0.6 - 2025-11-26
 
 **Full Changelog**: https://github.com/smart-dato/dpd-sdk/compare/0.0.5...0.0.6
