@@ -1,6 +1,7 @@
 <?php
 
 use SmartDato\Dpd\Builders\ShipmentBuilder;
+use SmartDato\Dpd\DTOs\Label;
 use SmartDato\Dpd\DTOs\ShipmentResponse;
 use SmartDato\Dpd\Services\ShipmentService;
 
@@ -102,7 +103,7 @@ it('can set product', function () {
 it('can create a shipment', function () {
     $mockResponse = new ShipmentResponse(
         parcelNumber: '123456789',
-        label: new \SmartDato\Dpd\DTOs\Label('base64content', 'PDF'),
+        label: new Label('base64content', 'PDF'),
         trackingUrl: 'https://tracking.dpd.de/status/de_DE/parcel/123456789'
     );
 
